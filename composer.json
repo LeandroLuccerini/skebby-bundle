@@ -1,0 +1,30 @@
+{
+    "name": "szopen/subitosms-bundle",
+    "description": "A bundle to send SMS through SubitoSms service",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Leandro Luccerini",
+            "email": "leandro.luccerini@gmail.com"
+        }
+    ],
+    "keywords" : [
+        "sms subitosms gateway"
+    ],
+    "require" : {
+        "ext-curl": "*",
+        "php": ">=7",
+        "symfony/framework-bundle": "^2.7 || ^3.0 || ^4.0",
+        "doctrine/doctrine-bundle": "*",
+        "giggsey/libphonenumber-for-php": "^8.10"
+    },
+    "autoload" : {
+        "psr-4": { "Szopen\\SubitoSmsBundle\\": "" }
+    },
+    "extra" : {
+        "branch-alias" : {
+            "dev-master" : "1.0"
+        }
+    }
+}
