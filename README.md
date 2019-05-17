@@ -10,6 +10,7 @@ Requirements
 - symfony/framework-bundle": ^2.7 || ^3.0 || ^4.0
 - doctrine/doctrine-bundle": *
 - giggsey/libphonenumber-for-php": ^8.10
+- guzzlehttp/guzzle: ^6.3
 
 Installation
 ------------
