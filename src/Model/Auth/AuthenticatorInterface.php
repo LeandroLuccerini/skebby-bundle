@@ -8,17 +8,15 @@
 
 namespace Szopen\SkebbyBundle\Model\Auth;
 
-use GuzzleHttp\Client;
-
 /**
- * Class AbstractAuthenticator
+ * Class AuthenticatorInterface
  *
- *
+ * This is the interface of a Strategy Pattern associated to Auth
  *
  * @author Leandro Luccerini <leandro.luccerini@gmail.com>
  * @package Szopen\SkebbyBundle\Model\Auth
  */
-abstract class AbstractAuthenticator
+abstract class AuthenticatorInterface
 {
 
     /**
@@ -29,18 +27,13 @@ abstract class AbstractAuthenticator
     const AUTH_ARRAY_USER_KEY = 'user_key';
 
     /**
+     * Logs into Skebby account and sets the userKey-Session_key|Access_token couple
      * Returns the couple "key" => "param" used for authentication in next API calls
      * E.g.: "user_key" => $userKey, Session_key => $param
      *
-     * @return array
-     */
-    abstract public function getAuthArray() : array;
-
-    /**
-     * Logs into Skebby account and sets the userKey-Session_key|Access_token couple
-     *
      * @param string $username
      * @param string $password
+     * @return array
      */
-    abstract public function login(string $username, string $password);
+    abstract public function login(string $username, string $password): array;
 }

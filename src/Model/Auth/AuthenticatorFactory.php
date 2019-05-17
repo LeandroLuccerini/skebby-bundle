@@ -24,17 +24,17 @@ class AuthenticatorFactory
      * Creates an Authenticator based on configuration
      *
      * @param string $type
-     * @return AbstractAuthenticator
+     * @return AuthenticatorInterface
      * @throws UnknownAuthenticatorException
      */
-    public static function create(string $type) : AbstractAuthenticator
+    public static function create(string $type) : AuthenticatorInterface
     {
         switch ($type){
             case 'session':
-                return new SessionAuthenticator();
+                return new SessionAuthenticatorInterface();
                 break;
             case 'token':
-                return new TokenAuthenticator();
+                return new TokenAuthenticatorInterface();
                 break;
         }
 

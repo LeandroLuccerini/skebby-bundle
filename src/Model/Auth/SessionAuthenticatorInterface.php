@@ -3,7 +3,7 @@
  * Project: skebby-bundle
  * User: Leandro Luccerini <leandro.luccerini@gmail.com>
  * Date: 17/05/19
- * Time: 15.53
+ * Time: 11.34
  */
 
 namespace Szopen\SkebbyBundle\Model\Auth;
@@ -14,15 +14,23 @@ use Szopen\SkebbyBundle\Exception\AuthenticationException;
 use Szopen\SkebbyBundle\Exception\UnknownErrorException;
 use Szopen\SkebbyBundle\Model\Endpoint;
 
-class TokenAuthenticator extends AbstractAuthenticator
+/**
+ * Class SessionAuthenticatorInterface
+ *
+ * This is a concrete strategy of the Strategy pattern associated to Auth
+ *
+ * @author Leandro Luccerini <leandro.luccerini@gmail.com>
+ * @package Szopen\SkebbyBundle\Model\Auth
+ */
+class SessionAuthenticatorInterface extends AuthenticatorInterface
 {
 
     /**
-     * This is onf of the key of the array used to authorise all the next API calls
+     * This is the key of the array used to authorise all the next API calls
      *
      * @const
      */
-    const AUTH_ARRAY_ACCESS_TOKEN = 'Access_token';
+    const AUTH_ARRAY_SESSION_KEY = 'Session_key';
 
     /**
      * User key returned by Skebby service after login.
@@ -33,50 +41,43 @@ class TokenAuthenticator extends AbstractAuthenticator
     protected $userKey;
 
     /**
-     * Access_token returned by Skebby service after login.
+     * Session_key returned by Skebby service after login.
      *
      * @var string
      */
-    protected $accessToken;
-
-    /**
-     * Returns the couple "key" => "param" used for authentication in next API calls
-     * E.g.: "user_key" => $userKey, Session_key => $param
-     *
-     * @return array
-     */
-    public function getAuthArray(): array
-    {
-        return [self::AUTH_ARRAY_USER_KEY => $this->userKey,
-            self::AUTH_ARRAY_ACCESS_TOKEN => $this->accessToken];
-    }
+    protected $sessionKey;
 
     /**
      * Logs into Skebby account and sets the userKey-Session_key|Access_token couple
+     * Returns the couple "key" => "param" used for authentication in next API calls
+     * E.g.: "user_key" => $userKey, Session_key => $param
      *
      * @param string $username
      * @param string $password
+     * @return array
      * @throws AuthenticationException
      * @throws UnknownErrorException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function login(string $username, string $password)
+    public function login(string $username, string $password): array
     {
         $httpClient = new Client(['base_uri' => Endpoint::BASE_URL]);
 
-        $response = $httpClient->request('GET', 'token',
+        $response = $httpClient->request('GET', 'login',
             ['query' => ['username' => $username, 'password' => $password]]);
 
-        switch($response->getStatusCode()){
+        switch ($response->getStatusCode()) {
             case 200:
-                list($this->userKey, $this->accessToken) = explode(";", $response->getBody());
+                list($this->userKey, $this->sessionKey) = explode(";", $response->getBody());
                 break;
             case 404:
                 throw new AuthenticationException("Credentials are incorrect.");
                 break;
             default:
-                throw new UnknownErrorException("Something wrong occurred: ".$response->getBody());
+                throw new UnknownErrorException("Something wrong occurred: " . $response->getBody());
                 break;
         }
+
+        return [self::AUTH_ARRAY_USER_KEY => $this->userKey, self::AUTH_ARRAY_SESSION_KEY => $this->sessionKey];
     }
 }

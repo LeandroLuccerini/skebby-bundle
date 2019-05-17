@@ -24,18 +24,4 @@ class Endpoint
      * @const
      */
     const BASE_URL = 'https://api.skebby.it/API/v1.0/REST/';
-
-    /**
-     * Session login endpoint
-     *
-     * @const
-     */
-    const SESSION_LOGIN = self::BASE_URL."login";
-
-    /**
-     * Token login endpoint
-     *
-     * @const
-     */
-    const TOKEN_LOGIN = self::BASE_URL."token";
 }
