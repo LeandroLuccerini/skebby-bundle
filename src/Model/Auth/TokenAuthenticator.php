@@ -14,7 +14,13 @@ use Szopen\SkebbyBundle\Exception\AuthenticationException;
 use Szopen\SkebbyBundle\Exception\UnknownErrorException;
 use Szopen\SkebbyBundle\Model\Endpoint;
 
-class TokenAuthenticatorInterface extends AuthenticatorInterface
+/**
+ * Class TokenAuthenticator
+ *
+ * @author Leandro Luccerini <leandro.luccerini@gmail.com>
+ * @package Szopen\SkebbyBundle\Model\Auth
+ */
+class TokenAuthenticator extends AuthenticatorInterface
 {
 
     /**

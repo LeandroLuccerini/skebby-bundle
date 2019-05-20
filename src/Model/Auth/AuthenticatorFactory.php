@@ -31,10 +31,10 @@ class AuthenticatorFactory
     {
         switch ($type){
             case 'session':
-                return new SessionAuthenticatorInterface();
+                return new SessionAuthenticator();
                 break;
             case 'token':
-                return new TokenAuthenticatorInterface();
+                return new TokenAuthenticator();
                 break;
         }
 

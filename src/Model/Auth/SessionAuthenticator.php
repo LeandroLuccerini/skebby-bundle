@@ -15,14 +15,14 @@ use Szopen\SkebbyBundle\Exception\UnknownErrorException;
 use Szopen\SkebbyBundle\Model\Endpoint;
 
 /**
- * Class SessionAuthenticatorInterface
+ * Class SessionAuthenticator
  *
  * This is a concrete strategy of the Strategy pattern associated to Auth
  *
  * @author Leandro Luccerini <leandro.luccerini@gmail.com>
  * @package Szopen\SkebbyBundle\Model\Auth
  */
-class SessionAuthenticatorInterface extends AuthenticatorInterface
+class SessionAuthenticator extends AuthenticatorInterface
 {
 
     /**
