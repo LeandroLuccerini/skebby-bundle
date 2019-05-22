@@ -10,7 +10,9 @@ namespace Szopen\SkebbyBundle\Model\Auth;
 
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Szopen\SkebbyBundle\Exception\AuthenticationException;
+use Szopen\SkebbyBundle\Exception\NotFoundException;
 use Szopen\SkebbyBundle\Exception\UnknownErrorException;
 use Szopen\SkebbyBundle\Model\Endpoint;
 
@@ -55,27 +57,36 @@ class TokenAuthenticator extends AuthenticatorInterface
      * @return array
      * @throws AuthenticationException
      * @throws UnknownErrorException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
+     * @throws NotFoundException
      */
-    public function login(string $username, string $password) : array
+    public function login(string $username, string $password): array
     {
         $httpClient = new Client(['base_uri' => Endpoint::BASE_URL]);
 
-        $response = $httpClient->request('GET', 'login',
-            ['query' => ['username' => $username, 'password' => $password]]);
+        try {
+            $response = $httpClient->request('GET', 'login',
+                ['query' => ['username' => $username, 'password' => $password]]);
 
-        switch ($response->getStatusCode()) {
-            case 200:
-                list($this->userKey, $this->accessToken) = explode(";", $response->getBody());
-                break;
-            case 404:
-                throw new AuthenticationException("Credentials are incorrect.");
-                break;
-            default:
-                throw new UnknownErrorException("Something wrong occurred: " . $response->getBody());
-                break;
+            list($this->userKey, $this->accessToken) = explode(";", $response->getBody());
+
+            return [self::AUTH_ARRAY_USER_KEY => $this->userKey, self::AUTH_ARRAY_ACCESS_TOKEN => $this->accessToken];
+        } catch (ClientException $e) {
+            switch ($e->getCode()) {
+                case 200:
+                    // Do nothing
+                    break;
+                case 401:
+                    throw new AuthenticationException("User_key, Token or Session_key are invalid or not provided", 1);
+                    break;
+                case 404:
+                    throw new NotFoundException('User key does not exist');
+                    break;
+                default:
+                    throw new UnknownErrorException("Something wrong occurred: " . $e->getMessage());
+                    break;
+            }
+
         }
-
-        return [self::AUTH_ARRAY_USER_KEY => $this->userKey, self::AUTH_ARRAY_ACCESS_TOKEN => $this->accessToken];
     }
 }
