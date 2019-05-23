@@ -104,7 +104,8 @@ class Client
 
         } catch (ClientException $e) {
             switch ($e->getCode()) {
-                case 200:
+                case 200: // No errors
+                case 201: // Message scheduled
                     // Do nothing
                     break;
                 case 401:

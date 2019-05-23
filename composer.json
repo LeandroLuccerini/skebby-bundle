@@ -20,7 +20,8 @@
         "giggsey/libphonenumber-for-php": "^8.10",
         "symfony/options-resolver": "^4.2",
         "guzzlehttp/guzzle": "^6.3",
-        "karriere/json-decoder": "^2.2"
+        "karriere/json-decoder": "^2.2",
+        "instasent/sms-counter-php": "^0.4.2"
     },
     "autoload" : {
         "psr-4": { "Szopen\\SkebbyBundle\\": "src/" }
