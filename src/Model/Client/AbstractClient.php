@@ -77,7 +77,7 @@ abstract class AbstractClient
         $this->password = $password;
         $this->authenticator = $authenticator;
         $this->httpClient = new HttpClient(['base_uri' => Endpoint::BASE_URL,
-            'headers' =>  array_merge(['content-type' => 'application/json'], $this->getAuthArray())]);
+            'headers' => array_merge(['content-type' => 'application/json'], $this->getAuthArray())]);
     }
 
 

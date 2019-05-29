@@ -10,10 +10,19 @@ namespace Szopen\SkebbyBundle\Model\Client;
 
 
 use Szopen\SkebbyBundle\Exception\CustomSenderNotAllowedException;
+use Szopen\SkebbyBundle\Exception\InvalidRecipientTypeException;
 use Szopen\SkebbyBundle\Exception\MissingParameterException;
 use Szopen\SkebbyBundle\Exception\RecipientsNotFoundException;
+use Szopen\SkebbyBundle\Model\Data\Group;
+use Szopen\SkebbyBundle\Model\Data\Recipient;
 use Szopen\SkebbyBundle\Model\Data\Sms;
 
+/**
+ * Class SmsClient
+ *
+ * @author Leandro Luccerini <leandro.luccerini@gmail.com>
+ * @package Szopen\SkebbyBundle\Model\Client
+ */
 class SmsClient extends AbstractClient
 {
     /**
@@ -22,14 +31,24 @@ class SmsClient extends AbstractClient
     const ACTION_SEND_SMS = 'sms';
 
     /**
+     * @const
+     */
+    const ACTION_SEND_GROUP_SMS = 'smstogroups';
+
+    /**
+     * Send an Sms to Recipients identified by a number one by one.
+     * All recipients must by of type Szopen\SkebbyBundle\Model\Data\Recipient otherwise raises
+     * an InvalidRecipientTypeException exception
+     *
      * @param Sms $sms
      * @param bool $allowInvalidRecipents Sending to an invalid recipient does not block the operation
      * @param bool $returnRemaining
      * @param bool $returnCredits
      *
-     * @return array
+     * @return mixed
      *
      * @throws CustomSenderNotAllowedException
+     * @throws InvalidRecipientTypeException
      * @throws MissingParameterException
      * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -37,14 +56,83 @@ class SmsClient extends AbstractClient
      * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
-    public function sendSms(Sms $sms, bool $allowInvalidRecipents = false, bool $returnRemaining = false, bool $returnCredits = false)
+    public function sendSms(Sms $sms,
+                            bool $allowInvalidRecipents = false,
+                            bool $returnRemaining = false,
+                            bool $returnCredits = false)
+    {
+        return $this->send($sms,
+            self::ACTION_SEND_SMS,
+            $allowInvalidRecipents,
+            $returnRemaining,
+            $returnCredits);
+    }
+
+    /**
+     * Send an Sms to Recipients identified by a groups
+     * All recipients must by of type Szopen\SkebbyBundle\Model\Data\Group otherwise raises
+     * an InvalidRecipientTypeException exception
+     *
+     * @param Sms $sms
+     * @param bool $allowInvalidRecipents Sending to an invalid recipient does not block the operation
+     * @param bool $returnRemaining
+     * @param bool $returnCredits
+     *
+     * @return mixed
+     *
+     * @throws CustomSenderNotAllowedException
+     * @throws InvalidRecipientTypeException
+     * @throws MissingParameterException
+     * @throws RecipientsNotFoundException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     */
+    public function sendGroupSms(Sms $sms,
+                            bool $allowInvalidRecipents = false,
+                            bool $returnRemaining = false,
+                            bool $returnCredits = false)
+    {
+        return $this->send($sms,
+            self::ACTION_SEND_GROUP_SMS,
+            $allowInvalidRecipents,
+            $returnRemaining,
+            $returnCredits);
+    }
+
+    /**
+     * @param Sms $sms
+     * @param string $endpoint Changes between sms and smstogroups
+     * @param bool $allowInvalidRecipents
+     * @param bool $returnRemaining
+     * @param bool $returnCredits
+     *
+     * @return mixed
+     *
+     * @throws CustomSenderNotAllowedException
+     * @throws InvalidRecipientTypeException
+     * @throws MissingParameterException
+     * @throws RecipientsNotFoundException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     */
+    protected function send(Sms $sms,
+                            string $endpoint,
+                            bool $allowInvalidRecipents,
+                            bool $returnRemaining,
+                            bool $returnCredits)
     {
         $data = $this->prepareRequest($sms, $allowInvalidRecipents, $returnRemaining, $returnCredits);
 
-        if($sms->hasParameters()) {
-            $response = $this->executeAction(self::ACTION_SEND_SMS, self::ACTION_METHOD_POST, json_encode($data, JSON_FORCE_OBJECT));
+        if ($sms->hasParameters()) {
+            $response = $this->executeAction($endpoint,
+                self::ACTION_METHOD_POST, json_encode($data, JSON_FORCE_OBJECT));
         } else {
-            $response = $this->executeAction(self::ACTION_SEND_SMS, self::ACTION_METHOD_POST, json_encode($data));
+            $response = $this->executeAction($endpoint,
+                self::ACTION_METHOD_POST, json_encode($data));
         }
 
         return json_decode($response->getBody()->getContents());
@@ -54,6 +142,7 @@ class SmsClient extends AbstractClient
      * Prepares the request to be sent
      *
      * @param Sms $sms
+     * @param bool $groups If must parse a recipient of Group type
      * @param bool $allowInvalidRecipents
      * @param bool $returnRemaining
      * @param bool $returnCredits
@@ -61,10 +150,15 @@ class SmsClient extends AbstractClient
      * @return array
      *
      * @throws CustomSenderNotAllowedException
-     * @throws RecipientsNotFoundException
+     * @throws InvalidRecipientTypeException
      * @throws MissingParameterException
+     * @throws RecipientsNotFoundException
      */
-    protected function prepareRequest(Sms $sms, bool $allowInvalidRecipents = false,  bool $returnRemaining = false, bool $returnCredits = false): array
+    protected function prepareRequest(Sms $sms,
+                                      bool $groups,
+                                      bool $allowInvalidRecipents = false,
+                                      bool $returnRemaining = false,
+                                      bool $returnCredits = false): array
     {
 
         if (!$sms->hasRecipients()) {
@@ -79,10 +173,10 @@ class SmsClient extends AbstractClient
             'encoding' => $sms->getEncoding(),
         ];
 
-        if($sms->hasParameters()){
-            $request['recipients'] = $this->prepareRecipients($sms, true);
+        if ($sms->hasParameters()) {
+            $request['recipients'] = $this->prepareRecipients($sms, $groups, true);
         } else {
-            $request['recipient'] = $this->prepareRecipients($sms);
+            $request['recipient'] = $this->prepareRecipients($sms, $groups);
         }
 
         if ($sms->hasSender()) {
@@ -119,26 +213,28 @@ class SmsClient extends AbstractClient
      * those parameters, otherwise MissingParameterException will be raised
      *
      * @param Sms $sms
+     * @param bool $groups If must parse a recipient of Group type
      * @param bool $parameters
      *
      * @return array
      *
+     * @throws InvalidRecipientTypeException
      * @throws MissingParameterException
      */
-    private function prepareRecipients(Sms $sms, bool $parameters = false): array
+    private function prepareRecipients(Sms $sms, bool $groups, bool $parameters = false): array
     {
 
         $recipients = $sms->getRecipients();
 
         $returnRecipients = [];
 
-        if($parameters){
+        if ($parameters && !$groups) {
 
             $smsParameters = $sms->getParameters();
 
-            foreach ($recipients as $r){
-                foreach ($smsParameters as $p){
-                    if(!$r->hasVariable($p)){
+            foreach ($recipients as $r) {
+                foreach ($smsParameters as $p) {
+                    if (!$r->hasVariable($p)) {
                         $message = "Recipient %s must contain parameter '%s'";
                         throw new MissingParameterException(sprintf($message, $r->getRecipient(), $p));
                     }
@@ -147,9 +243,16 @@ class SmsClient extends AbstractClient
             }
 
         } else {
-           foreach ($recipients as $r){
-               $returnRecipients[] = $r->getRecipient();
-           }
+            foreach ($recipients as $r) {
+                if ($groups && !($r instanceof Group)) {
+                    $message = "Recipient %s must be an instance of %s";
+                    throw new InvalidRecipientTypeException(sprintf($message, $r->getRecipient(), Group::class));
+                } elseif (!$groups && !($r instanceof Recipient)) {
+                    $message = "Recipient %s must be an instance of %s";
+                    throw new InvalidRecipientTypeException(sprintf($message, $r->getRecipient(), Recipient::class));
+                }
+                $returnRecipients[] = $r->getRecipient();
+            }
         }
 
         return $returnRecipients;

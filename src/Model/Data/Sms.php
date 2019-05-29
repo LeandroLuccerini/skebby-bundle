@@ -359,7 +359,7 @@ class Sms
         // Finds all the parameters placeholders
         preg_match_all(self::PARAMETER_REGEX, $message, $matches);
         // Sets all the parameters name
-        foreach ($matches[0] as $paramPlaceHolder){
+        foreach ($matches[0] as $paramPlaceHolder) {
             $this->parameters[] = str_replace(["$", "{", "}"], "", $paramPlaceHolder);
         }
 
