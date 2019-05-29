@@ -9,6 +9,7 @@
 namespace Szopen\SkebbyBundle\Model\Client;
 
 
+use Karriere\JsonDecoder\JsonDecoder;
 use Szopen\SkebbyBundle\Exception\CustomSenderNotAllowedException;
 use Szopen\SkebbyBundle\Exception\InvalidRecipientTypeException;
 use Szopen\SkebbyBundle\Exception\MissingParameterException;
@@ -16,6 +17,10 @@ use Szopen\SkebbyBundle\Exception\RecipientsNotFoundException;
 use Szopen\SkebbyBundle\Model\Data\Group;
 use Szopen\SkebbyBundle\Model\Data\Recipient;
 use Szopen\SkebbyBundle\Model\Data\Sms;
+use Szopen\SkebbyBundle\Model\Response\SmsSend;
+use Szopen\SkebbyBundle\Model\Response\Status;
+use Szopen\SkebbyBundle\Model\Transformers\SmsSendTransformer;
+
 
 /**
  * Class SmsClient
@@ -53,13 +58,14 @@ class SmsClient extends AbstractClient
      * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
      * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function sendSms(Sms $sms,
                             bool $allowInvalidRecipents = false,
                             bool $returnRemaining = false,
-                            bool $returnCredits = false)
+                            bool $returnCredits = false): SmsSend
     {
         return $this->send($sms,
             self::ACTION_SEND_SMS,
@@ -86,13 +92,14 @@ class SmsClient extends AbstractClient
      * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
      * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function sendGroupSms(Sms $sms,
                             bool $allowInvalidRecipents = false,
                             bool $returnRemaining = false,
-                            bool $returnCredits = false)
+                            bool $returnCredits = false): SmsSend
     {
         return $this->send($sms,
             self::ACTION_SEND_GROUP_SMS,
@@ -116,6 +123,7 @@ class SmsClient extends AbstractClient
      * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
      * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
@@ -123,7 +131,7 @@ class SmsClient extends AbstractClient
                             string $endpoint,
                             bool $allowInvalidRecipents,
                             bool $returnRemaining,
-                            bool $returnCredits)
+                            bool $returnCredits): SmsSend
     {
         $data = $this->prepareRequest($sms, $allowInvalidRecipents, $returnRemaining, $returnCredits);
 
@@ -135,7 +143,15 @@ class SmsClient extends AbstractClient
                 self::ACTION_METHOD_POST, json_encode($data));
         }
 
-        return json_decode($response->getBody()->getContents());
+        $jsonDecoder = new JsonDecoder(true, true);
+        $jsonDecoder->register(new SmsSendTransformer());
+        $r = $response->getBody()->getContents();
+
+        $response = $jsonDecoder->decode($r, SmsSend::class);
+        // Updates Sms
+        $sms->setOrderId($response->getOrderId());
+
+        return $response;
     }
 
     /**
