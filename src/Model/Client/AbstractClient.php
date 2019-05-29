@@ -24,7 +24,7 @@ use Szopen\SkebbyBundle\Model\Endpoint;
  * @author Leandro Luccerini <leandro.luccerini@gmail.com>
  * @package Szopen\SkebbyBundle\Model\Client
  */
-class Client
+abstract class AbstractClient
 {
 
     /**
@@ -53,7 +53,7 @@ class Client
     private $password;
 
     /**
-     * @var Client
+     * @var HttpClient
      */
     private $httpClient;
 
@@ -77,7 +77,7 @@ class Client
         $this->password = $password;
         $this->authenticator = $authenticator;
         $this->httpClient = new HttpClient(['base_uri' => Endpoint::BASE_URL,
-            'headers' => $this->getAuthArray()]);
+            'headers' =>  array_merge(['content-type' => 'application/json'], $this->getAuthArray())]);
     }
 
 
@@ -96,12 +96,10 @@ class Client
      */
     protected function executeAction(string $action,
                                      string $method = self::ACTION_METHOD_GET,
-                                     array $data = []): ResponseInterface
+                                     string $data = ''): ResponseInterface
     {
         try {
-
-            $response = $this->httpClient->request($method, $action, [RequestOptions::JSON => $data]);
-
+            $response = $this->httpClient->request($method, $action, [RequestOptions::BODY => $data]);
         } catch (ClientException $e) {
             switch ($e->getCode()) {
                 case 200: // No errors

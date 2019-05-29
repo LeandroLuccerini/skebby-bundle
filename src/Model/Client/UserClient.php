@@ -23,7 +23,7 @@ use Szopen\SkebbyBundle\Model\Transformers\StatusTransformer;
  * @author Leandro Luccerini <leandro.luccerini@gmail.com>
  * @package Szopen\SkebbyBundle\Model\Client
  */
-class UserClient extends Client
+class UserClient extends AbstractClient
 {
     /**
      * @const

@@ -16,6 +16,7 @@ use Szopen\SkebbyBundle\Exception\InvalidDeliveryDate;
 use Szopen\SkebbyBundle\Exception\InvalidOrderIdException;
 use Szopen\SkebbyBundle\Exception\MessageLengthException;
 use Szopen\SkebbyBundle\Exception\TooMuchRecipientsException;
+use Szopen\SkebbyBundle\Exception\InvalidMessageTypeException;
 
 /**
  * Class Sms
@@ -59,7 +60,27 @@ class Sms
     /**
      * @const
      */
+    const PARAMETER_REGEX = '/\$\{[a-z0-9]{1,}\}/i';
+
+    /**
+     * @const
+     */
     const DEFAULT_LOCALE = 'IT';
+
+    /**
+     * @const
+     */
+    const SMS_CLASSIC_PLUS_KEY = 'GP';
+
+    /**
+     * @const
+     */
+    const SMS_CLASSIC_KEY = 'TI';
+
+    /**
+     * @const
+     */
+    const SMS_BASIC_KEY = 'SI';
 
     /**
      * @var string
@@ -67,14 +88,9 @@ class Sms
     private $sender = '';
 
     /**
-     * @var string[]
+     * @var RecipientInterface[]
      */
     private $recipients;
-
-    /**
-     * @var string[][]
-     */
-    private $recipientVariables;
 
     /**
      * @var string
@@ -105,13 +121,6 @@ class Sms
     private $orderId = '';
 
     /**
-     * Sending to an invalid recipient does not block the operation
-     *
-     * @var bool
-     */
-    private $allowInvalidRecipients;
-
-    /**
      * The SMS encoding. Use UCS2 for non standard character sets
      *
      * @var string
@@ -123,32 +132,48 @@ class Sms
      *
      * @var int
      */
-    private $landingPagId;
+    private $landingPageId;
 
     /**
      * The campaign name
      *
      * @var string
      */
-    private $campaignName;
+    private $campaignName = '';
 
     /**
      * The url where the short link redirects. Also add the %SHORT_LINK% placeholder in the message body
      *
      * @var string
      */
-    private $shortLinkUrl;
+    private $shortLinkUrl = '';
+
+    /**
+     * Array list of paramaters
+     *
+     * @var array
+     */
+    private $parameters = [];
 
     /**
      * Sms constructor.
      *
-     * @param bool $allowInvalidRecipients
+     * @param string $messageType
+     *
+     * @throws InvalidMessageTypeException
      */
-    public function __construct(bool $allowInvalidRecipients)
+    public function __construct(string $messageType)
     {
-        $this->allowInvalidRecipients = $allowInvalidRecipients;
+        $arrayOfTypes = [Sms::SMS_BASIC_KEY, Sms::SMS_CLASSIC_KEY, Sms::SMS_CLASSIC_PLUS_KEY];
+
+        if (!in_array($messageType, $arrayOfTypes)) {
+            $message = "Invalid message type, given %s, allowed %s";
+            throw new InvalidMessageTypeException(sprintf($message, $messageType, implode(", ", $arrayOfTypes)));
+        }
+
+        $this->messageType = $messageType;
+
         $this->recipients = [];
-        $this->recipientVariables = [];
     }
 
     /**
@@ -171,7 +196,15 @@ class Sms
     }
 
     /**
-     * @return string[]
+     * @return bool
+     */
+    public function hasSender(): bool
+    {
+        return !empty($this->sender);
+    }
+
+    /**
+     * @return RecipientInterface[]
      */
     public function getRecipients(): array
     {
@@ -179,46 +212,41 @@ class Sms
     }
 
     /**
-     * @param string[] $recipients
-     * @param string $locale
+     * @param RecipientInterface[] $recipients
      *
      * @return Sms
      *
      * @throws TooMuchRecipientsException
      * @throws \libphonenumber\NumberParseException
      */
-    public function setRecipients(array $recipients, string $locale = self::DEFAULT_LOCALE): Sms
+    public function setRecipients(array $recipients): Sms
     {
         if (count($recipients) > self::MAX_RECIPIENTS) {
             throw new TooMuchRecipientsException(sprintf("Triyng to send sms to %d recipients, %d allowed",
                 count($recipients), self::MAX_RECIPIENTS));
         }
 
-        // Checks for validity of every number
-        if (!$this->allowInvalidRecipients) {
-            foreach ($recipients as $r) {
-                $this->addRecipient($r, $locale);
+        $this->recipients = [];
+
+        foreach ($recipients as $r) {
+            if (is_a($r, RecipientInterface::class)) {
+                $this->recipients[] = $r;
             }
-        } else {
-            $this->recipients = $recipients;
         }
 
         return $this;
     }
 
     /**
-     * Add a recipient phone number.
-     * It will be processed and normalizeb by giggsey/libphonenumber-for-php
+     * Add a recipient.
      *
-     * @param string $recipient
-     * @param string $locale
+     * @param RecipientInterface $recipient
      *
      * @return Sms
      *
      * @throws TooMuchRecipientsException
-     * @throws \libphonenumber\NumberParseException
      */
-    public function addRecipient(string $recipient, string $locale = self::DEFAULT_LOCALE): Sms
+    public function addRecipient(RecipientInterface $recipient): Sms
     {
 
         if ((count($this->recipients) + 1) > self::MAX_RECIPIENTS) {
@@ -226,40 +254,13 @@ class Sms
                 (count($this->recipients) + 1), self::MAX_RECIPIENTS));
         }
 
-        if (false !== array_search($recipient, $this->recipients)) {
-
-            if (!$this->allowInvalidRecipients) {
-                $pnu = PhoneNumberUtil::getInstance();
-                $numberProto = $pnu->parse($recipient, $locale);
-
-                $this->recipients[] = $pnu->format($numberProto, PhoneNumberFormat::E164);
-            } else {
-                $this->recipients[] = $recipient;
-            }
-        }
+        $this->recipients[] = $recipient;
 
         return $this;
     }
 
     /**
-     * Add a group to recipients list.
-     * Group must exists in Skebby control panel.
-     *
-     * @param string $group
-     *
-     * @return Sms
-     */
-    public function addGroup(string $group): Sms
-    {
-        if (false !== array_search($group, $this->recipients)) {
-            $this->recipients[] = $group;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Removes a recipient and its variables
+     * Removes a recipient based on phone number|group name
      *
      * @param string $recipient
      *
@@ -267,23 +268,15 @@ class Sms
      */
     public function removeRecipient(string $recipient): Sms
     {
-        if (false !== $index = array_search($recipient, $this->recipients)) {
-            unset($this->recipients[$index]);
+
+        for ($i = 0; $i < count($this->recipients); $i++) {
+            if ($this->recipients[$i]->getRecipient() == $recipient) {
+                unset($this->recipients[$i]);
+                exit;
+            }
         }
 
-        unset($this->recipientVariables[$recipient]);
-    }
-
-    /**
-     * It's an alias of Sms::removeRecipient
-     *
-     * @param string $group
-     *
-     * @return Sms
-     */
-    public function removeGroup(string $group): Sms
-    {
-        return $this->removeRecipient($group);
+        return $this;
     }
 
     /**
@@ -297,82 +290,32 @@ class Sms
     }
 
     /**
-     * Gets the recipient variables.
-     *
-     * @return string[][]
+     * @return array
      */
-    public function getRecipientVariables(): array
+    public function getParameters(): array
     {
-        return $this->recipientVariables;
+        return $this->parameters;
     }
 
     /**
-     * Sets the recipient variables for the specified recipient.
+     * Checks if a parameter exists
      *
-     * @param string $recipient
-     * @param string[] $recipientVariables
-     *
-     * @return Sms
+     * @param string $name
+     * @return bool
      */
-    public function setRecipientVariables(string $recipient, array $recipientVariables): Sms
+    public function hasParameter(string $name): bool
     {
-        $this->recipientVariables[$recipient] = $recipientVariables;
-        return $this;
+        return in_array($name, $this->parameters);
     }
 
     /**
-     * Adds a single recipient variable for the specified recipient.
-     *
-     * @param string $recipient
-     * @param string $variable
-     * @param string $value
-     *
-     * @return Sms
-     */
-    public function addRecipientVariable(string $recipient, string $variable, string $value): Sms
-    {
-
-        if (!isset($this->recipientVariables[$recipient])) {
-            $this->recipientVariables[$recipient] = [];
-        }
-
-        $this->recipientVariables[$recipient][$variable] = $value;
-        return $this;
-    }
-
-    /**
-     * Removes the recipient variable for the recipient specified.
-     *
-     * @param string $recipient
-     * @param string $recipientVariable
-     *
-     * @return Sms
-     */
-    public function removeRecipientVariable(string $recipient, string $recipientVariable): Sms
-    {
-        unset($this->recipientVariables[$recipient][$recipientVariable]);
-        return $this;
-    }
-
-    /**
-     * Whether the current sms has or not recipient variables.
+     * Checks if the message contains parameters
      *
      * @return bool
      */
-    public function hasRecipientVariables(): bool
+    public function hasParameters(): bool
     {
-        return !empty($this->recipientVariables);
-    }
-
-    /**
-     * Clears the recipient variables.
-     *
-     * @return $this
-     */
-    public function clearRecipientVariables(): self
-    {
-        $this->recipientVariables = [];
-        return $this;
+        return !empty($this->parameters);
     }
 
     /**
@@ -400,25 +343,33 @@ class Sms
         // Sets the right encoding according to charaters used
         if ($report->encoding == SMSCounter::GSM_7BIT || $report->encoding == SMSCounter::GSM_7BIT_EX) {
             $this->encoding = self::ENCONDING_GMS;
-            if ($report->lentgh > self::ENCONDING_GMS_MAX_LENGTH) {
+            if ($report->length > self::ENCONDING_GMS_MAX_LENGTH) {
                 throw new MessageLengthException(sprintf($exMessage, $report->length, self::ENCONDING_GMS, self::ENCONDING_GMS_MAX_LENGTH));
             }
         } else {
             $this->encoding = self::ENCODING_UCS2;
-            if ($report->lentgh > self::ENCONDING_UCS2_MAX_LENGTH) {
+            if ($report->length > self::ENCONDING_UCS2_MAX_LENGTH) {
                 throw new MessageLengthException(sprintf($exMessage, $report->length, self::ENCODING_UCS2, self::ENCONDING_UCS2_MAX_LENGTH));
             }
         }
 
         $this->message = $message;
+        // Reset parameters
+        $this->parameters = [];
+        // Finds all the parameters placeholders
+        preg_match_all(self::PARAMETER_REGEX, $message, $matches);
+        // Sets all the parameters name
+        foreach ($matches[0] as $paramPlaceHolder){
+            $this->parameters[] = str_replace(["$", "{", "}"], "", $paramPlaceHolder);
+        }
 
         return $this;
     }
 
     /**
-     * @return \DateTime
+     * @return \DateTime|null
      */
-    public function getDeliveryTime(): \DateTime
+    public function getDeliveryTime(): ?\DateTime
     {
         return $this->deliveryTime;
     }
@@ -496,14 +447,6 @@ class Sms
     }
 
     /**
-     * @return bool
-     */
-    public function isAllowInvalidRecipients(): bool
-    {
-        return $this->allowInvalidRecipients;
-    }
-
-    /**
      * @return string
      */
     public function getEncoding(): string
@@ -514,19 +457,19 @@ class Sms
     /**
      * @return int
      */
-    public function getLandingPagId(): int
+    public function getLandingPageId(): int
     {
-        return $this->landingPagId;
+        return $this->landingPageId;
     }
 
     /**
-     * @param int $landingPagId
+     * @param int $landingPageId
      *
      * @return Sms
      */
-    public function setLandingPagId(int $landingPagId): Sms
+    public function setLandingPageId(int $landingPageId): Sms
     {
-        $this->landingPagId = $landingPagId;
+        $this->landingPaegId = $landingPageId;
         return $this;
     }
 
@@ -550,6 +493,14 @@ class Sms
     }
 
     /**
+     * @return bool
+     */
+    public function hasCampaignName(): bool
+    {
+        return !empty($this->campaignName);
+    }
+
+    /**
      * @return string
      */
     public function getShortLinkUrl(): string
@@ -566,6 +517,32 @@ class Sms
     {
         $this->shortLinkUrl = $shortLinkUrl;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasShortLinkUrl(): bool
+    {
+        return !empty($this->shortLinkUrl);
+    }
+
+    /**
+     * Format number using giggsey/libphonenumber-for-php
+     *
+     * @param string $number
+     * @param string $locale
+     *
+     * @return string
+     *
+     * @throws \libphonenumber\NumberParseException
+     */
+    private function parseNumber(string $number, string $locale): string
+    {
+        $pnu = PhoneNumberUtil::getInstance();
+        $numberProto = $pnu->parse($number, $locale);
+
+        return $pnu->format($numberProto, PhoneNumberFormat::E164);
     }
 
 }
