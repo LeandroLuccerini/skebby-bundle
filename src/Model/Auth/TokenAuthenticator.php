@@ -65,7 +65,7 @@ class TokenAuthenticator extends AuthenticatorInterface
         $httpClient = new Client(['base_uri' => Endpoint::BASE_URL]);
 
         try {
-            $response = $httpClient->request('GET', 'login',
+            $response = $httpClient->request('GET', 'token',
                 ['query' => ['username' => $username, 'password' => $password]]);
 
             list($this->userKey, $this->accessToken) = explode(";", $response->getBody());

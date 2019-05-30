@@ -24,7 +24,9 @@ class AuthenticatorFactory
      * Creates an Authenticator based on configuration
      *
      * @param string $type
+     *
      * @return AuthenticatorInterface
+     *
      * @throws UnknownAuthenticatorException
      */
     public static function create(string $type) : AuthenticatorInterface
