@@ -95,7 +95,7 @@ class UserClient extends AbstractClient
     {
         $password = $this->urlEncode($password);
         $url = sprintf(self::ACTION_RESET_PASSWORD . "?password=%s", $password);
-        $response = $this->executeAction($url);
+        $response = $this->executeAction($url, self::ACTION_METHOD_POST);
 
         return $response->getBody()->getContents();
     }

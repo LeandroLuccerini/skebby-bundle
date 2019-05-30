@@ -38,10 +38,18 @@ class SmsClient extends AbstractClient
     /**
      * @const
      */
+    const ACTION_SEND_PARAM_SMS = 'paramsms';
+
+    /**
+     * @const
+     */
     const ACTION_SEND_GROUP_SMS = 'smstogroups';
 
     /**
      * Send an Sms to Recipients identified by a number one by one.
+     * If the message of the Sms contains at least one parameter placeholder ${paramname}, the system decides which
+     * endpoint to use.
+     *
      * All recipients must by of type Szopen\SkebbyBundle\Model\Data\Recipient otherwise raises
      * an InvalidRecipientTypeException exception
      *
@@ -67,8 +75,12 @@ class SmsClient extends AbstractClient
                             bool $returnRemaining = false,
                             bool $returnCredits = false): SmsSend
     {
+
+        // Decides which endpoint to use
+        $endopoint = $sms->hasParameters() ? self::ACTION_SEND_PARAM_SMS : self::ACTION_SEND_SMS;
+
         return $this->send($sms,
-            self::ACTION_SEND_SMS,
+            $endopoint,
             $allowInvalidRecipents,
             $returnRemaining,
             $returnCredits);
