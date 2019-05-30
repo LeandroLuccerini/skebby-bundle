@@ -57,7 +57,7 @@ Simple Symfony Usage
 -------------
 You have access to the ```SkebbyManager``` service in your controller. 
 
-#####Check your account status
+#### Check your account status
 ```php
 /**
  * @Route("/skebby/user", name="skebby.user")
