@@ -33,15 +33,12 @@ class Configuration implements ConfigurationInterface
                     ->values(['token', 'session'])
                     ->defaultValue('token')
                     ->isRequired()->end()
-                ->enumNode('message_type')
+                ->enumNode('default_message_type')
                     ->values(['GP', 'TI', 'SI'])
                     ->defaultValue('TI')
                     ->isRequired()->end()
                 ->scalarNode('default_sender_alias')
                     ->defaultNull()->end()
-                ->scalarNode('default_locale')
-                    ->defaultValue('IT')
-                    ->isRequired()->end()
             ->end();
 
         return $treeBuilder;

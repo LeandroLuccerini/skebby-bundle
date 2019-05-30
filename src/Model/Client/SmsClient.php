@@ -48,11 +48,11 @@ class SmsClient extends AbstractClient
 
 
     /**
-     * Send an Sms to Recipients identified by a number one by one.
+     * Send an Sms to Recipients identified by a number, one by one.
      * If the message of the Sms contains at least one parameter placeholder ${paramname}, the system decides which
      * endpoint to use.
      *
-     * All recipients must by of type Szopen\SkebbyBundle\Model\Data\Recipient otherwise raises
+     * All recipients must be of type Szopen\SkebbyBundle\Model\Data\Recipient otherwise raises
      * an InvalidRecipientTypeException exception
      *
      * @param Sms $sms

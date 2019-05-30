@@ -1,2 +1,9 @@
 services:
-  # Add your service
+  Szopen\SkebbyBundle\Model\Manager\SkebbyManager:
+    arguments:
+      $username: "%szopen_skebby.username%"
+      $password: "%szopen_skebby.password%"
+      $authType: "%szopen_skebby.auth_type%"
+      $messageType: "%szopen_skebby.default_message_type%"
+      $sender: "%szopen_skebby.default_sender_alias%"
+    public: true

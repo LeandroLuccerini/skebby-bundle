@@ -80,7 +80,7 @@ class UserClient extends AbstractClient
     }
 
     /**
-     * Changes the authenticated user’s password
+     * Changes the authenticated user's password
      *
      * @param string $password
      *

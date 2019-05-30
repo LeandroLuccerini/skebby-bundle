@@ -10,8 +10,6 @@ namespace Szopen\SkebbyBundle\Model\Data;
 
 
 use Instasent\SMSCounter\SMSCounter;
-use libphonenumber\PhoneNumberFormat;
-use libphonenumber\PhoneNumberUtil;
 use Szopen\SkebbyBundle\Exception\InvalidDeliveryDate;
 use Szopen\SkebbyBundle\Exception\InvalidOrderIdException;
 use Szopen\SkebbyBundle\Exception\MessageLengthException;
@@ -526,23 +524,4 @@ class Sms
     {
         return !empty($this->shortLinkUrl);
     }
-
-    /**
-     * Format number using giggsey/libphonenumber-for-php
-     *
-     * @param string $number
-     * @param string $locale
-     *
-     * @return string
-     *
-     * @throws \libphonenumber\NumberParseException
-     */
-    private function parseNumber(string $number, string $locale): string
-    {
-        $pnu = PhoneNumberUtil::getInstance();
-        $numberProto = $pnu->parse($number, $locale);
-
-        return $pnu->format($numberProto, PhoneNumberFormat::E164);
-    }
-
 }
