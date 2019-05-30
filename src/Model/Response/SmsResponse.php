@@ -9,7 +9,7 @@
 namespace Szopen\SkebbyBundle\Model\Response;
 
 
-class SmsSend
+class SmsResponse
 {
     /**
      * @var string
@@ -47,9 +47,9 @@ class SmsSend
     /**
      * @param string $result
      *
-     * @return SmsSend
+     * @return SmsResponse
      */
-    public function setResult(string $result): SmsSend
+    public function setResult(string $result): SmsResponse
     {
         $this->result = $result;
         return $this;
@@ -66,9 +66,9 @@ class SmsSend
     /**
      * @param string|null $orderId
      *
-     * @return SmsSend
+     * @return SmsResponse
      */
-    public function setOrderId(?string $orderId): SmsSend
+    public function setOrderId(?string $orderId): SmsResponse
     {
         $this->orderId = $orderId;
         return $this;
@@ -85,9 +85,9 @@ class SmsSend
     /**
      * @param string|null $internalOrderId
      *
-     * @return SmsSend
+     * @return SmsResponse
      */
-    public function setInternalOrderId(?string $internalOrderId): SmsSend
+    public function setInternalOrderId(?string $internalOrderId): SmsResponse
     {
         $this->internalOrderId = $internalOrderId;
         return $this;
@@ -104,9 +104,9 @@ class SmsSend
     /**
      * @param int $totalSent
      *
-     * @return SmsSend
+     * @return SmsResponse
      */
-    public function setTotalSent(int $totalSent): SmsSend
+    public function setTotalSent(int $totalSent): SmsResponse
     {
         $this->totalSent = $totalSent;
         return $this;
@@ -123,9 +123,9 @@ class SmsSend
     /**
      * @param int $remainingCredits
      *
-     * @return SmsSend
+     * @return SmsResponse
      */
-    public function setRemainingCredits(int $remainingCredits): SmsSend
+    public function setRemainingCredits(int $remainingCredits): SmsResponse
     {
         $this->remainingCredits = $remainingCredits;
         return $this;

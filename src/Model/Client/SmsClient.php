@@ -17,9 +17,10 @@ use Szopen\SkebbyBundle\Exception\RecipientsNotFoundException;
 use Szopen\SkebbyBundle\Model\Data\Group;
 use Szopen\SkebbyBundle\Model\Data\Recipient;
 use Szopen\SkebbyBundle\Model\Data\Sms;
-use Szopen\SkebbyBundle\Model\Response\SmsSend;
+use Szopen\SkebbyBundle\Model\Data\SmsRecipientDeliveryState;
+use Szopen\SkebbyBundle\Model\Response\SmsResponse;
 use Szopen\SkebbyBundle\Model\Response\Status;
-use Szopen\SkebbyBundle\Model\Transformers\SmsSendTransformer;
+use Szopen\SkebbyBundle\Model\Transformers\SmsResponseTransformer;
 
 
 /**
@@ -44,6 +45,7 @@ class SmsClient extends AbstractClient
      * @const
      */
     const ACTION_SEND_GROUP_SMS = 'smstogroups';
+
 
     /**
      * Send an Sms to Recipients identified by a number one by one.
@@ -73,7 +75,7 @@ class SmsClient extends AbstractClient
     public function sendSms(Sms $sms,
                             bool $allowInvalidRecipents = false,
                             bool $returnRemaining = false,
-                            bool $returnCredits = false): SmsSend
+                            bool $returnCredits = false): SmsResponse
     {
 
         // Decides which endpoint to use
@@ -109,15 +111,54 @@ class SmsClient extends AbstractClient
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function sendGroupSms(Sms $sms,
-                            bool $allowInvalidRecipents = false,
-                            bool $returnRemaining = false,
-                            bool $returnCredits = false): SmsSend
+                                 bool $allowInvalidRecipents = false,
+                                 bool $returnRemaining = false,
+                                 bool $returnCredits = false): SmsResponse
     {
         return $this->send($sms,
             self::ACTION_SEND_GROUP_SMS,
             $allowInvalidRecipents,
             $returnRemaining,
             $returnCredits);
+    }
+
+    /**
+     * Get informations on the SMS delivery status of the given $orderId.
+     *
+     * @param string $orderId
+     *
+     * @return SmsRecipientDeliveryState[]
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     */
+    public function getSmsState(string $orderId): array
+    {
+        $endpoint = self::ACTION_SEND_SMS . "/%s";
+        $response = $this->executeAction(sprintf($endpoint, $orderId));
+
+        $r = json_decode($response->getBody()->getContents(), true);
+
+        $states = [];
+
+        foreach ($r['recipients'] as $state) {
+
+            $s = new SmsRecipientDeliveryState();
+            $s->setRecipient($state['destination']);
+            $s->setStatus($state['status']);
+
+            if (!empty($state['delivery_date'])) {
+                $s->setDeliveryDate(\DateTime::createFromFormat("YmdHis", $state['delivery_date']));
+            } else {
+                $s->setDeliveryDate(null);
+            }
+
+            $states[] = $s;
+        }
+
+        return $states;
     }
 
     /**
@@ -143,7 +184,7 @@ class SmsClient extends AbstractClient
                             string $endpoint,
                             bool $allowInvalidRecipents,
                             bool $returnRemaining,
-                            bool $returnCredits): SmsSend
+                            bool $returnCredits): SmsResponse
     {
         $data = $this->prepareRequest($sms, $allowInvalidRecipents, $returnRemaining, $returnCredits);
 
@@ -156,10 +197,10 @@ class SmsClient extends AbstractClient
         }
 
         $jsonDecoder = new JsonDecoder(true, true);
-        $jsonDecoder->register(new SmsSendTransformer());
+        $jsonDecoder->register(new SmsResponseTransformer());
         $r = $response->getBody()->getContents();
 
-        $response = $jsonDecoder->decode($r, SmsSend::class);
+        $response = $jsonDecoder->decode($r, SmsResponse::class);
         // Updates Sms
         $sms->setOrderId($response->getOrderId());
 
@@ -182,11 +223,11 @@ class SmsClient extends AbstractClient
      * @throws MissingParameterException
      * @throws RecipientsNotFoundException
      */
-    protected function prepareRequest(Sms $sms,
-                                      bool $groups,
-                                      bool $allowInvalidRecipents = false,
-                                      bool $returnRemaining = false,
-                                      bool $returnCredits = false): array
+    private function prepareRequest(Sms $sms,
+                                    bool $groups,
+                                    bool $allowInvalidRecipents = false,
+                                    bool $returnRemaining = false,
+                                    bool $returnCredits = false): array
     {
 
         if (!$sms->hasRecipients()) {

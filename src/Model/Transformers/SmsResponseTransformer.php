@@ -12,9 +12,9 @@ namespace Szopen\SkebbyBundle\Model\Transformers;
 use Karriere\JsonDecoder\Bindings\AliasBinding;
 use Karriere\JsonDecoder\ClassBindings;
 use Karriere\JsonDecoder\Transformer;
-use Szopen\SkebbyBundle\Model\Response\SmsSend;
+use Szopen\SkebbyBundle\Model\Response\SmsResponse;
 
-class SmsSendTransformer implements Transformer
+class SmsResponseTransformer implements Transformer
 {
 
     /**
@@ -37,6 +37,6 @@ class SmsSendTransformer implements Transformer
      */
     public function transforms()
     {
-        return SmsSend::class;
+        return SmsResponse::class;
     }
 }
