@@ -1,17 +1,6 @@
 # Skebby Symfony bundle
 This is an unofficial Symfony4 bundle for the [Skebby](https://www.skebby.it) sms service provider.
 
-Requirements
-------------
-- ext-curl: *,
-- php: >=7,
-- symfony/options-resolver: ^4.2
-- giggsey/libphonenumber-for-php >= 7.0
-- symfony/framework-bundle": ^2.7 || ^3.0 || ^4.0
-- doctrine/doctrine-bundle": *
-- giggsey/libphonenumber-for-php": ^8.10
-- guzzlehttp/guzzle: ^6.3
-
 Installation
 ------------
 The suggested installation method is via [composer](https://getcomposer.org/):
@@ -22,6 +11,16 @@ $ composer require szopen/skebby-bundle
 
 Configuration
 -------------
+Enable the bundle in ```config/bundles.php```
+
+```php
+return [
+    // ...
+    // ...
+    Szopen\SkebbyBundle\SkebbyBundle::class => ['all' => true],
+];
+```
+ 
 In your ```config/packages/skebby_bundle.yaml```:
 ```yaml
 skebby:
@@ -53,9 +52,25 @@ skebby:
   # is used. Must be empty if the message type does not allow a custom TPOA.
   #
   # default_sender_alias: ~
-  
-  # Locale is used to parse phone numbers. Being Skebby an italian service, default value is "IT".
-  # You can also add numbers with foreign prefix without worrying about locale.    
-  #
-  # default_locale: 'IT'
 ```
+Simple Symfony Usage
+-------------
+You have access to the ```SkebbyManager``` service in your controller. 
+
+#####Check your account status
+```php
+/**
+ * @Route("/skebby/user", name="skebby.user")
+ */
+public function userAction(SkebbyManager $skebby)
+{
+
+    $s = $skebby->getStatus();
+
+    return $this->render('skebby/index.html.twig', [
+        'status' => $s,
+    ]);
+}
+```
+
+```SkebbyManager::getStatus``` returns a [```Szopen\SkebbyBundle\Model\Response```](src/Model/Response/Status.php)
