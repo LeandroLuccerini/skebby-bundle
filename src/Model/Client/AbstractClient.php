@@ -38,6 +38,11 @@ abstract class AbstractClient
     const ACTION_METHOD_POST = 'POST';
 
     /**
+     * @const
+     */
+    const ACTION_METHOD_DELETE = 'DELETE';
+
+    /**
      * @var AuthenticatorInterface
      */
     protected $authenticator;
@@ -110,7 +115,7 @@ abstract class AbstractClient
                     throw new AuthenticationException("User_key, Token or Session_key are invalid or not provided", 1);
                     break;
                 case 404:
-                    throw new NotFoundException('User key does not exist');
+                    throw new NotFoundException();
                     break;
                 default:
                     throw new UnknownErrorException("Something wrong occurred: " . $e->getMessage());

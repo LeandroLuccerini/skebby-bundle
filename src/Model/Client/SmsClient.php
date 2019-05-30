@@ -13,13 +13,13 @@ use Karriere\JsonDecoder\JsonDecoder;
 use Szopen\SkebbyBundle\Exception\CustomSenderNotAllowedException;
 use Szopen\SkebbyBundle\Exception\InvalidRecipientTypeException;
 use Szopen\SkebbyBundle\Exception\MissingParameterException;
+use Szopen\SkebbyBundle\Exception\NotFoundException;
 use Szopen\SkebbyBundle\Exception\RecipientsNotFoundException;
 use Szopen\SkebbyBundle\Model\Data\Group;
 use Szopen\SkebbyBundle\Model\Data\Recipient;
 use Szopen\SkebbyBundle\Model\Data\Sms;
 use Szopen\SkebbyBundle\Model\Data\SmsRecipientDeliveryState;
 use Szopen\SkebbyBundle\Model\Response\SmsResponse;
-use Szopen\SkebbyBundle\Model\Response\Status;
 use Szopen\SkebbyBundle\Model\Transformers\SmsResponseTransformer;
 
 
@@ -136,29 +136,59 @@ class SmsClient extends AbstractClient
      */
     public function getSmsState(string $orderId): array
     {
-        $endpoint = self::ACTION_SEND_SMS . "/%s";
-        $response = $this->executeAction(sprintf($endpoint, $orderId));
+        try {
+            $endpoint = self::ACTION_SEND_SMS . "/%s";
+            $response = $this->executeAction(sprintf($endpoint, $orderId));
 
-        $r = json_decode($response->getBody()->getContents(), true);
+            $r = json_decode($response->getBody()->getContents(), true);
 
-        $states = [];
+            $states = [];
 
-        foreach ($r['recipients'] as $state) {
+            foreach ($r['recipients'] as $state) {
 
-            $s = new SmsRecipientDeliveryState();
-            $s->setRecipient($state['destination']);
-            $s->setStatus($state['status']);
+                $s = new SmsRecipientDeliveryState();
+                $s->setRecipient($state['destination']);
+                $s->setStatus($state['status']);
 
-            if (!empty($state['delivery_date'])) {
-                $s->setDeliveryDate(\DateTime::createFromFormat("YmdHis", $state['delivery_date']));
-            } else {
-                $s->setDeliveryDate(null);
+                if (!empty($state['delivery_date'])) {
+                    $s->setDeliveryDate(\DateTime::createFromFormat("YmdHis", $state['delivery_date']));
+                } else {
+                    $s->setDeliveryDate(null);
+                }
+
+                $states[] = $s;
             }
 
-            $states[] = $s;
+            return $states;
+        } catch (NotFoundException $e) {
+            return [];
         }
+    }
 
-        return $states;
+    /**
+     * Deletes the SMS delivery process of the given $orderId.
+     *
+     * @param string $orderId
+     *
+     * @return bool
+     *
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     */
+    public function deleteScheduledDelivery(string $orderId): bool
+    {
+        try {
+
+            $endpoint = self::ACTION_SEND_SMS . "/%s";
+            $this->executeAction(sprintf($endpoint, $orderId), self::ACTION_METHOD_DELETE);
+
+            return true;
+
+        } catch (NotFoundException $e) {
+            return false;
+        }
     }
 
     /**
