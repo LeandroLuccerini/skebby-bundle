@@ -203,3 +203,17 @@ $sms->addRecipient($recipient);
 $smsResponse = $smsClient->sendSms($sms);
 ```
 You can read more on methods comments of [```Szopen\SkebbyBundle\Model\Client\SmsClient```](src/Model/Client/SmsClient.php)
+
+#### SkebbyManager
+This class is configured as a Symfony4 service and wraps all the clients methods.
+It adds the ```SkebbyManager::createDefaultSms``` that returns an Sms using all the default parameters configured in the yaml file.
+```php
+
+$sms = $skebby->createDefaultSms('Hello, this is a test message');
+$sms->addRecipient(new Recipient("+393211234567"));
+    
+// You can also add recipients in constructor
+$sms = $skebby->createDefaultSms('Hello, this is a test message',
+    [new Recipient('3331234567'), new Recipient('3207654321')]);
+```
+You can read more on methods comments of [```Szopen\SkebbyBundle\Model\Manager\SkebbyManager```](src/Model/Manager/SkebbyManager.php)
