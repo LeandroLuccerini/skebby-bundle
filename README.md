@@ -142,7 +142,8 @@ $smsClient = new SmsClient('username', 'password', $auth);
 $sms = new Sms(Sms::SMS_CLASSIC_KEY);
 
 // Add a message
-// SmsClient choose wich kind of encoding to use, between UCS2 and GSM, authomatically parsing the message.
+// SmsClient choose wich kind of encoding to use, between UCS2 and GSM, 
+// authomatically parsing the message.
 // It also counts chars available based on encoding, if the ength of the message exceeds the limit
 // it raises a MessageLengthException
 $sms->setMessage("Hello, this is a GSM encoded message");
@@ -161,9 +162,12 @@ $sms->addRecipient($recipient);
 
 // Sending SMS
 $smsResponse = $smsClient->sendSms($sms);
-// You can choose to allow invalid recipients (that means that an invalid recipient won't block the entire operation)
-// and if you want have the remaining sms and credit
-$smsResponse = $smsClient->sendSms($sms, true/* Allow invalid */,true /* Return remaining */,true/* Return credit */);
+// You can choose to allow invalid recipients (that means that an invalid recipient 
+// won't block the entire operation) and if you want have the remaining sms and credit
+$smsResponse = $smsClient->sendSms($sms, 
+    true, // Allow invalid recipients
+    true, // Return remaining
+    true, // Return credit);
 ```
 
 You can send Sms to groups. In this case the recipients must be of type Group  
@@ -174,8 +178,8 @@ $sms->addRecipient($recipient);
 
 // Sending SMS
 $smsResponse = $smsClient->sendGroupSms($sms);
-// You can choose to allow invalid recipients (that means that an invalid recipient won't block the entire operation)
-// and if you want have the remaining sms and credit
+// You can choose to allow invalid recipients (that means that an invalid recipient 
+// won't block the entire operation) and if you want have the remaining sms and credit
 $smsResponse = $smsClient->sendGroupSms($sms, 
     true, // Allow invalid recipients
     true, // Return remaining
