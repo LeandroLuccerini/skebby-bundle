@@ -167,7 +167,8 @@ $smsResponse = $smsClient->sendSms($sms);
 $smsResponse = $smsClient->sendSms($sms, 
     true, // Allow invalid recipients
     true, // Return remaining
-    true, // Return credit);
+    true, // Return credit
+    );
 ```
 
 You can send Sms to groups. In this case the recipients must be of type Group  
@@ -183,13 +184,14 @@ $smsResponse = $smsClient->sendGroupSms($sms);
 $smsResponse = $smsClient->sendGroupSms($sms, 
     true, // Allow invalid recipients
     true, // Return remaining
-    true, // Return credit);
+    true, // Return credit
+    );
 ```
 Sending messages with parameters is also possible. You can't send parametric sms to groups 
 ```php
 // Adds a message with parameters
 // The system recognizes the parameters in the text 
-$sms->setMessage("Hello ${name}, i know your surname is ${surname}");
+$sms->setMessage('Hello ${name}, i know your surname is ${surname}');
 
 // Creating and adding a Recipient with parameters
 $recipient = new Recipient("+393211234567");
