@@ -59,6 +59,10 @@ You have access to the ```SkebbyManager``` service in your controller.
 
 #### Check your account status
 ```php
+use Szopen\SkebbyBundle\Model\Manager\SkebbyManager;
+
+// ..
+
 /**
  * @Route("/skebby/status", name="skebby.status")
  */
@@ -77,6 +81,11 @@ public function statusAction(SkebbyManager $skebby)
 
 #### Send an SMS
 ```php
+use Szopen\SkebbyBundle\Model\Manager\SkebbyManager;
+use Szopen\SkebbyBundle\Model\Data\Recipient;
+
+// ..
+
 /**
  * @Route("/skebby/send", name="skebby.sendsms")
  */
@@ -106,6 +115,10 @@ Please refer to [Official Skebby Developer Documentation](https://developers.ske
 #### Authenticators
 You can choose which kind of authentication to use by ```AuthenticatorFactory``` class.
 ```php
+use Szopen\SkebbyBundle\Model\Auth\AuthenticatorFactory;
+
+//..
+
 // Token authentication
 $auth = AuthenticatorFactory::create('token')
 // Session authentication
@@ -120,6 +133,11 @@ Session authentication lasts 5 minutes if no API call is performed.
 Class dedicated to the User/Account API calls.
 
 ```php
+use Szopen\SkebbyBundle\Model\Auth\AuthenticatorFactory;
+use Szopen\SkebbyBundle\Model\Client\UserClient;
+
+//..
+
 // Token authentication
 $auth = AuthenticatorFactory::create('token')
 
@@ -132,6 +150,12 @@ Class dedicated to the Sms API calls.
 
 Sending a Simple Sms.
 ```php
+use Szopen\SkebbyBundle\Model\Auth\AuthenticatorFactory;
+use Szopen\SkebbyBundle\Model\Client\SmsClient;
+use Szopen\SkebbyBundle\Model\Data\Recipient;
+
+//..
+
 // Token authentication
 $auth = AuthenticatorFactory::create('token')
 
@@ -173,6 +197,12 @@ $smsResponse = $smsClient->sendSms($sms,
 
 You can send Sms to groups. In this case the recipients must be of type Group  
 ```php
+use Szopen\SkebbyBundle\Model\Auth\AuthenticatorFactory;
+use Szopen\SkebbyBundle\Model\Client\SmsClient;
+use Szopen\SkebbyBundle\Model\Data\Group;
+
+//..
+
 // Creating and adding a recipient
 $recipient = new Group("groupname");
 $sms->addRecipient($recipient);
