@@ -13,11 +13,10 @@
         "symfony sms skebby gateway"
     ],
     "require" : {
-        "ext-curl": "*",
-        "ext-json": "*",
+        "ext-curl": "^7.2",
+        "ext-json": "^1.6",
         "php": ">=7",
-        "symfony/framework-bundle": "^2.7 || ^3.0 || ^4.0",
-        "doctrine/doctrine-bundle": "*",
+        "symfony/framework-bundle": "^4.0",
         "giggsey/libphonenumber-for-php": "^8.10",
         "guzzlehttp/guzzle": "^6.3",
         "karriere/json-decoder": "^2.2",
@@ -25,10 +24,5 @@
     },
     "autoload" : {
         "psr-4": { "Szopen\\SkebbyBundle\\": "src/" }
-    },
-    "extra" : {
-        "branch-alias" : {
-            "dev-master" : "1.0"
-        }
     }
 }
