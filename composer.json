@@ -1,5 +1,5 @@
 {
-    "name": "szopen/skebby-bundle",
+    "name": "leandro980/skebby-bundle",
     "description": "A bundle to send SMS through Skebby service",
     "type": "symfony-bundle",
     "license": "MIT",
@@ -10,7 +10,7 @@
         }
     ],
     "keywords" : [
-        "sms skebby gateway"
+        "symfony sms skebby gateway"
     ],
     "require" : {
         "ext-curl": "*",

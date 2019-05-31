@@ -6,7 +6,7 @@ Installation
 The suggested installation method is via [composer](https://getcomposer.org/):
 
 ```sh
-$ composer require szopen/skebby-bundle
+$ composer require leandro980/skebby-bundle
 ```
 
 Configuration
