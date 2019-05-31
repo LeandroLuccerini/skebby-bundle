@@ -101,7 +101,7 @@ class UserClient extends AbstractClient
     }
 
     /**
-     * Used to retrieve the credits and other information of the user identified by the id.
+     * Used to retrieve the credits and other informations of the user identified by the id.
      *
      * @param bool $getMoney Add user current money to response.
      *

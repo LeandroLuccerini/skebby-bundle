@@ -1,4 +1,4 @@
-# Skebby Symfony bundle
+# Skebby Symfony4 bundle
 This is an unofficial Symfony4 bundle for the [Skebby](https://www.skebby.it) sms service provider.
 
 Installation
@@ -25,7 +25,7 @@ In your ```config/packages/skebby_bundle.yaml```:
 ```yaml
 skebby:
 
-  # Add your skebby account credentials
+  # Add your Skebby account credentials
   username: 'yourskebbyusername'
   password: 'yourskebbypassword'
   
@@ -60,9 +60,9 @@ You have access to the ```SkebbyManager``` service in your controller.
 #### Check your account status
 ```php
 /**
- * @Route("/skebby/user", name="skebby.user")
+ * @Route("/skebby/status", name="skebby.status")
  */
-public function userAction(SkebbyManager $skebby)
+public function statusAction(SkebbyManager $skebby)
 {
 
     $s = $skebby->getStatus();
@@ -73,4 +73,129 @@ public function userAction(SkebbyManager $skebby)
 }
 ```
 
-```SkebbyManager::getStatus``` returns a [```Szopen\SkebbyBundle\Model\Response```](src/Model/Response/Status.php)
+```SkebbyManager::getStatus``` returns a [```Szopen\SkebbyBundle\Model\Response\Status```](src/Model/Response/Status.php)
+
+#### Send an SMS
+```php
+/**
+ * @Route("/skebby/send", name="skebby.sendsms")
+ */
+public function sendSmsAction(SkebbyManager $skebby)
+{
+
+    $sms = $skebby->createDefaultSms('Hello, this is a test message',
+    [new Recipient('3331234567'), new Recipient('3207654321')]);
+
+    $response = $skebby->sendSms($sms);
+
+    return $this->render('skebby/index.html.twig', [
+        'response' => $response,
+    ]);
+}
+```
+```SkebbyManager::sendSms``` returns a [```Szopen\SkebbyBundle\Model\Response\SmsResponse```](src/Model/Response/SmsResponse.php)
+
+## Documentation
+The Skebby bundle uses a set of clients classes that perform their specific API calls. The ```SkebbyManager``` is a service that wraps all the clients methods.
+Please refer to [Official Skebby Developer Documentation](https://developers.skebby.it/) for further info. 
+* [Authenticators](#authenticators)
+* [UserClient](#userclient)
+* [SmsClient](#smsclient)
+* [SkebbyManager](#skebbymanager)
+
+#### Authenticators
+You can choose which kind of authentication to use by ```AuthenticatorFactory``` class.
+```php
+// Token authentication
+$auth = AuthenticatorFactory::create('token')
+// Session authentication
+// $auth = AuthenticatorFactory::create('session')
+
+// Used to authenticate in later API calls
+$arrayAccess = $auth->login('username', 'password');
+```
+Session authentication lasts 5 minutes if no API call is performed.
+
+#### UserClient
+Class dedicated to the User/Account API calls.
+
+```php
+// Token authentication
+$auth = AuthenticatorFactory::create('token')
+
+$userClient = new UserClient('username', 'password', $auth);
+```
+You can read more on methods comments of [```Szopen\SkebbyBundle\Model\Client\UserClient```](src/Model/Client/UserClient.php)
+
+#### SmsClient
+Class dedicated to the Sms API calls.
+
+Sending a Simple Sms.
+```php
+// Token authentication
+$auth = AuthenticatorFactory::create('token')
+
+$smsClient = new SmsClient('username', 'password', $auth);
+
+// Creating an sms
+// You must choose which kind of SMS type to send 
+$sms = new Sms(Sms::SMS_CLASSIC_KEY);
+
+// Add a message
+// SmsClient choose wich kind of encoding to use, between UCS2 and GSM, authomatically parsing the message.
+// It also counts chars available based on encoding, if the ength of the message exceeds the limit
+// it raises a MessageLengthException
+$sms->setMessage("Hello, this is a GSM encoded message");
+// Substitutes message
+$sms->setMessage("Hello, this is a UCS2 encoded message because of ç char");
+
+// Set sender
+// You can add sender only if your not using BASIC SMS and the aliasis registered to your account
+$sms->setSender('YourAlias');
+
+// Creating and adding a Recipient
+// When you create a "Recipient" it parses the phone number, if it's not valid it raises
+// a \libphonenumber\NumberParseException 
+$recipient = new Recipient("+393211234567");
+$sms->addRecipient($recipient);
+
+// Sending SMS
+$smsResponse = $smsClient->sendSms($sms);
+// You can choose to allow invalid recipients (that means that an invalid recipient won't block the entire operation)
+// and if you want have the remaining sms and credit
+$smsResponse = $smsClient->sendSms($sms, true/* Allow invalid */,true /* Return remaining */,true/* Return credit */);
+```
+
+You can send Sms to groups. In this case the recipients must be of type Group  
+```php
+// Creating and adding a recipient
+$recipient = new Group("groupname");
+$sms->addRecipient($recipient);
+
+// Sending SMS
+$smsResponse = $smsClient->sendGroupSms($sms);
+// You can choose to allow invalid recipients (that means that an invalid recipient won't block the entire operation)
+// and if you want have the remaining sms and credit
+$smsResponse = $smsClient->sendGroupSms($sms, 
+    true, // Allow invalid recipients
+    true, // Return remaining
+    true, // Return credit);
+```
+Sending messages with parameters is also possible. You can't send parametric sms to groups 
+```php
+// Adds a message with parameters
+// The system recognizes the parameters in the text 
+$sms->setMessage("Hello ${name}, i know your surname is ${surname}");
+
+// Creating and adding a Recipient with parameters
+$recipient = new Recipient("+393211234567");
+$recipient->addVariable('name', 'John');
+$recipient->addVariable('surname', 'Dorian');
+$sms->addRecipient($recipient);
+
+// Sending SMS
+// If just a Recipient does'nt contains all the parameters defined in message 
+// it raises a MissingParameterException 
+$smsResponse = $smsClient->sendSms($sms);
+```
+You can read more on methods comments of [```Szopen\SkebbyBundle\Model\Client\SmsClient```](src/Model/Client/SmsClient.php)
