@@ -217,3 +217,6 @@ $sms = $skebby->createDefaultSms('Hello, this is a test message',
     [new Recipient('3331234567'), new Recipient('3207654321')]);
 ```
 You can read more on methods comments of [```Szopen\SkebbyBundle\Model\Manager\SkebbyManager```](src/Model/Manager/SkebbyManager.php)
+
+## License
+MIT License, please see [LICENSE](LICENSE) for more information.
