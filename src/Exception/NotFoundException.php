@@ -1,6 +1,6 @@
 <?php
 /**
- * Project: bundle-development
+ * Project: skebby-bundle
  * User: Leandro Luccerini <leandro.luccerini@gmail.com>
  * Date: 20/05/19
  * Time: 10.08
