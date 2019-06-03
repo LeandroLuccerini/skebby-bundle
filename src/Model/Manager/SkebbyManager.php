@@ -12,6 +12,7 @@ namespace Szopen\SkebbyBundle\Model\Manager;
 use Szopen\SkebbyBundle\Exception\CustomSenderNotAllowedException;
 use Szopen\SkebbyBundle\Exception\InvalidRecipientTypeException;
 use Szopen\SkebbyBundle\Exception\MissingParameterException;
+use Szopen\SkebbyBundle\Exception\NotFoundException;
 use Szopen\SkebbyBundle\Exception\RecipientsNotFoundException;
 use Szopen\SkebbyBundle\Model\Auth\AuthenticatorFactory;
 use Szopen\SkebbyBundle\Model\Auth\AuthenticatorInterface;
@@ -20,6 +21,7 @@ use Szopen\SkebbyBundle\Model\Client\UserClient;
 use Szopen\SkebbyBundle\Model\Data\RecipientInterface;
 use Szopen\SkebbyBundle\Model\Data\Sms;
 use Szopen\SkebbyBundle\Model\Data\SmsRecipientDeliveryState;
+use Szopen\SkebbyBundle\Model\Response\SmsHistorycalResponse;
 use Szopen\SkebbyBundle\Model\Response\SmsResponse;
 use Szopen\SkebbyBundle\Model\Response\Status;
 
@@ -188,14 +190,15 @@ class SkebbyManager
      *
      * @return SmsResponse
      *
+     * @throws CustomSenderNotAllowedException
+     * @throws InvalidRecipientTypeException
+     * @throws MissingParameterException
+     * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\CustomSenderNotAllowedException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidRecipientTypeException
-     * @throws \Szopen\SkebbyBundle\Exception\MissingParameterException
      * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\RecipientsNotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function sendSms(Sms $sms,
@@ -224,6 +227,7 @@ class SkebbyManager
      * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
      * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
@@ -245,7 +249,7 @@ class SkebbyManager
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function getSmsState(string $orderId): array
@@ -262,12 +266,37 @@ class SkebbyManager
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function deleteScheduledDelivery(string $orderId): bool
     {
         return $this->getSmsClient()->deleteScheduledDelivery($orderId);
+    }
+
+    /**
+     * This API is used to retrieve the SMS messages sending history.
+     *
+     * @param \DateTime $from
+     * @param \DateTime|null $to
+     * @param int|null $page
+     * @param int|null $pageSize
+     *
+     * @return SmsHistorycalResponse[]
+     *
+     * @throws NotFoundException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidMessageTypeException
+     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     */
+    public function getMessagesHistory(\DateTime $from,
+                                       \DateTime $to = null,
+                                       int $page = null,
+                                       int $pageSize = null): array
+    {
+        return $this->getSmsClient()->getMessagesHistory($from, $to, $page, $pageSize);
     }
 
     /**

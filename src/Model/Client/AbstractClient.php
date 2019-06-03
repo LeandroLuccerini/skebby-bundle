@@ -13,6 +13,7 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use Szopen\SkebbyBundle\Exception\AuthenticationException;
+use Szopen\SkebbyBundle\Exception\InvalidInputException;
 use Szopen\SkebbyBundle\Exception\NotFoundException;
 use Szopen\SkebbyBundle\Exception\UnknownErrorException;
 use Szopen\SkebbyBundle\Model\Auth\AuthenticatorInterface;
@@ -92,9 +93,10 @@ abstract class AbstractClient
      *
      * @param string $action
      * @param string $method
-     * @param array $data
+     * @param string $data
      * @return ResponseInterface
      * @throws AuthenticationException
+     * @throws InvalidInputException
      * @throws NotFoundException
      * @throws UnknownErrorException
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -111,6 +113,8 @@ abstract class AbstractClient
                 case 201: // Message scheduled
                     // Do nothing
                     break;
+                case 400:
+                    throw new InvalidInputException($e->getMessage());
                 case 401:
                     throw new AuthenticationException("User_key, Token or Session_key are invalid or not provided", 1);
                     break;

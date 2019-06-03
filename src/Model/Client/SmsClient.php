@@ -19,6 +19,7 @@ use Szopen\SkebbyBundle\Model\Data\Group;
 use Szopen\SkebbyBundle\Model\Data\Recipient;
 use Szopen\SkebbyBundle\Model\Data\Sms;
 use Szopen\SkebbyBundle\Model\Data\SmsRecipientDeliveryState;
+use Szopen\SkebbyBundle\Model\Response\SmsHistorycalResponse;
 use Szopen\SkebbyBundle\Model\Response\SmsResponse;
 use Szopen\SkebbyBundle\Model\Transformers\SmsResponseTransformer;
 
@@ -46,6 +47,11 @@ class SmsClient extends AbstractClient
      */
     const ACTION_SEND_GROUP_SMS = 'smstogroups';
 
+    /**
+     * @const
+     */
+    const ACTION_GET_MSG_HISTORY = 'smshistory';
+
 
     /**
      * Send an Sms to Recipients identified by a number, one by one.
@@ -65,11 +71,12 @@ class SmsClient extends AbstractClient
      * @throws CustomSenderNotAllowedException
      * @throws InvalidRecipientTypeException
      * @throws MissingParameterException
+     * @throws NotFoundException
      * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function sendSms(Sms $sms,
@@ -103,11 +110,12 @@ class SmsClient extends AbstractClient
      * @throws CustomSenderNotAllowedException
      * @throws InvalidRecipientTypeException
      * @throws MissingParameterException
+     * @throws NotFoundException
      * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function sendGroupSms(Sms $sms,
@@ -131,7 +139,7 @@ class SmsClient extends AbstractClient
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function getSmsState(string $orderId): array
@@ -174,7 +182,7 @@ class SmsClient extends AbstractClient
      *
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     public function deleteScheduledDelivery(string $orderId): bool
@@ -192,6 +200,65 @@ class SmsClient extends AbstractClient
     }
 
     /**
+     *  This API is used to retrieve the SMS messages sending history.
+     *
+     * @param \DateTime $from
+     * @param \DateTime|null $to
+     * @param int|null $page
+     * @param int|null $pageSize
+     *
+     * @return SmsHistorycalResponse[]
+     *
+     * @throws NotFoundException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidMessageTypeException
+     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     */
+    public function getMessagesHistory(\DateTime $from,
+                                       \DateTime $to = null,
+                                       int $page = null,
+                                       int $pageSize = null): array
+    {
+
+        $endpoint = self::ACTION_GET_MSG_HISTORY . "?from=%d";
+        $endpoint = sprintf($endpoint, $from->format("YmdHis"));
+
+        if(null !== $to){
+            $endpoint .=  "&to=%d";
+            $endpoint = sprintf($endpoint, $to->format("YmdHis"));
+        }
+
+        if(null !== $page){
+            $endpoint .=  "&pageNumber=%d";
+            $endpoint = sprintf($endpoint, $page);
+        }
+
+        if(null !== $pageSize){
+            $endpoint .= "&pageSize=%d";
+            $endpoint = sprintf($endpoint, $pageSize);
+        }
+
+        $response = $this->executeAction($endpoint);
+
+        $r = json_decode($response->getBody()->getContents(), true);
+
+        $smss = [];
+
+        foreach ($r['smshistory'] as $s){
+            $smss[] = new SmsHistorycalResponse($s['order_id'],
+                $s['create_time'],
+                $s['message_type'],
+                $s['num_recipients'],
+                $s['sender'],
+                $s['schedule_time']);
+        }
+
+        return $smss;
+    }
+
+    /**
      * @param Sms $sms
      * @param string $endpoint Changes between sms and smstogroups
      * @param bool $allowInvalidRecipents
@@ -203,11 +270,12 @@ class SmsClient extends AbstractClient
      * @throws CustomSenderNotAllowedException
      * @throws InvalidRecipientTypeException
      * @throws MissingParameterException
+     * @throws NotFoundException
      * @throws RecipientsNotFoundException
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
+     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
      * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
      * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
      */
     protected function send(Sms $sms,
