@@ -41,16 +41,21 @@ class Recipient implements RecipientInterface
      * Recipient constructor.
      *
      * @param string $recipient
+     * @param bool $allowInvalid
      * @param string $locale
      *
      * @throws \libphonenumber\NumberParseException
      */
-    public function __construct(string $recipient, string $locale = self::DEFAULT_LOCALE)
+    public function __construct(string $recipient, bool $allowInvalid = false, string $locale = self::DEFAULT_LOCALE)
     {
-        $pnu = PhoneNumberUtil::getInstance();
-        $numberProto = $pnu->parse($recipient, $locale);
+        if(!$allowInvalid) {
+            $pnu = PhoneNumberUtil::getInstance();
+            $numberProto = $pnu->parse($recipient, $locale);
 
-        $this->recipient = $pnu->format($numberProto, PhoneNumberFormat::E164);
+            $this->recipient = $pnu->format($numberProto, PhoneNumberFormat::E164);
+        } else {
+            $this->recipient = $recipient;
+        }
 
         $this->variables = [];
     }
