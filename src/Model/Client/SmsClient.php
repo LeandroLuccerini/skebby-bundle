@@ -90,6 +90,7 @@ class SmsClient extends AbstractClient
 
         return $this->send($sms,
             $endopoint,
+            false,
             $allowInvalidRecipents,
             $returnRemaining,
             $returnCredits);
@@ -125,6 +126,7 @@ class SmsClient extends AbstractClient
     {
         return $this->send($sms,
             self::ACTION_SEND_GROUP_SMS,
+            true,
             $allowInvalidRecipents,
             $returnRemaining,
             $returnCredits);
@@ -261,6 +263,7 @@ class SmsClient extends AbstractClient
     /**
      * @param Sms $sms
      * @param string $endpoint Changes between sms and smstogroups
+     * @param bool $groups
      * @param bool $allowInvalidRecipents
      * @param bool $returnRemaining
      * @param bool $returnCredits
@@ -280,11 +283,12 @@ class SmsClient extends AbstractClient
      */
     protected function send(Sms $sms,
                             string $endpoint,
+                            bool $groups,
                             bool $allowInvalidRecipents,
                             bool $returnRemaining,
                             bool $returnCredits): SmsResponse
     {
-        $data = $this->prepareRequest($sms, $allowInvalidRecipents, $returnRemaining, $returnCredits);
+        $data = $this->prepareRequest($sms, $groups, $allowInvalidRecipents, $returnRemaining, $returnCredits);
 
         if ($sms->hasParameters()) {
             $response = $this->executeAction($endpoint,
