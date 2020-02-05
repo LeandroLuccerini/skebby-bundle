@@ -22,5 +22,11 @@
     },
     "autoload" : {
         "psr-4": { "Szopen\\SkebbyBundle\\": "src/" }
+    },
+    "extra": {
+        "symfony": {
+            "allow-contrib": false,
+            "require": "5.0.*"
+        }
     }
 }
