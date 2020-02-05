@@ -1,4 +1,4 @@
-# Skebby Symfony4 bundle
+# Skebby Symfony5 bundle
 This is an unofficial Symfony5 bundle for the [Skebby](https://www.skebby.it) sms service provider.
 
 Installation
