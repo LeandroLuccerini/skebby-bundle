@@ -9,11 +9,21 @@
 namespace Szopen\SkebbyBundle\Model\Manager;
 
 
+use GuzzleHttp\Exception\GuzzleException;
+use libphonenumber\NumberParseException;
+use Szopen\SkebbyBundle\Exception\AuthenticationException;
 use Szopen\SkebbyBundle\Exception\CustomSenderNotAllowedException;
+use Szopen\SkebbyBundle\Exception\InvalidInputException;
+use Szopen\SkebbyBundle\Exception\InvalidMessageTypeException;
+use Szopen\SkebbyBundle\Exception\InvalidOrderIdException;
 use Szopen\SkebbyBundle\Exception\InvalidRecipientTypeException;
+use Szopen\SkebbyBundle\Exception\MessageLengthException;
 use Szopen\SkebbyBundle\Exception\MissingParameterException;
 use Szopen\SkebbyBundle\Exception\NotFoundException;
 use Szopen\SkebbyBundle\Exception\RecipientsNotFoundException;
+use Szopen\SkebbyBundle\Exception\TooMuchRecipientsException;
+use Szopen\SkebbyBundle\Exception\UnknownAuthenticatorException;
+use Szopen\SkebbyBundle\Exception\UnknownErrorException;
 use Szopen\SkebbyBundle\Model\Auth\AuthenticatorFactory;
 use Szopen\SkebbyBundle\Model\Auth\AuthenticatorInterface;
 use Szopen\SkebbyBundle\Model\Client\SmsClient;
@@ -83,7 +93,7 @@ class SkebbyManager
      * @param string $sender
      * @param string $locale
      *
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownAuthenticatorException
+     * @throws UnknownAuthenticatorException
      */
     public function __construct(string $username,
                                 string $password,
@@ -111,10 +121,10 @@ class SkebbyManager
      *
      * @return string
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
      */
     public function getDashboard(): string
     {
@@ -126,10 +136,10 @@ class SkebbyManager
      *
      * @return bool
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
      */
     public function checkSession(): bool
     {
@@ -143,10 +153,10 @@ class SkebbyManager
      *
      * @return bool
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
      */
     public function resetPassword(string $password): bool
     {
@@ -160,10 +170,10 @@ class SkebbyManager
      *
      * @return Status
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
      */
     public function getStatus(bool $getMoney = true): Status
     {
@@ -194,12 +204,12 @@ class SkebbyManager
      * @throws InvalidRecipientTypeException
      * @throws MissingParameterException
      * @throws RecipientsNotFoundException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws InvalidOrderIdException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
      */
     public function sendSms(Sms $sms,
                             bool $allowInvalidRecipents = false,
@@ -225,12 +235,12 @@ class SkebbyManager
      * @throws InvalidRecipientTypeException
      * @throws MissingParameterException
      * @throws RecipientsNotFoundException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws InvalidOrderIdException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
      */
     public function sendGroupSms(Sms $sms,
                                  bool $allowInvalidRecipents = false,
@@ -247,10 +257,10 @@ class SkebbyManager
      *
      * @return SmsRecipientDeliveryState[]
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws UnknownErrorException
      */
     public function getSmsState(string $orderId): array
     {
@@ -264,10 +274,10 @@ class SkebbyManager
      *
      * @return bool
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws UnknownErrorException
      */
     public function deleteScheduledDelivery(string $orderId): bool
     {
@@ -285,11 +295,11 @@ class SkebbyManager
      * @return SmsHistorycalResponse[]
      *
      * @throws NotFoundException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidMessageTypeException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws InvalidMessageTypeException
+     * @throws UnknownErrorException
      */
     public function getMessagesHistory(\DateTime $from,
                                        \DateTime $to = null,
@@ -307,10 +317,10 @@ class SkebbyManager
      *
      * @return Sms
      *
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidMessageTypeException
-     * @throws \Szopen\SkebbyBundle\Exception\MessageLengthException
-     * @throws \Szopen\SkebbyBundle\Exception\TooMuchRecipientsException
-     * @throws \libphonenumber\NumberParseException
+     * @throws InvalidMessageTypeException
+     * @throws MessageLengthException
+     * @throws TooMuchRecipientsException
+     * @throws NumberParseException
      */
     public function createDefaultSms(string $message, array $recipients = []): Sms
     {

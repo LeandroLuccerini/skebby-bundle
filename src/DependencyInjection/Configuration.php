@@ -36,7 +36,7 @@ class Configuration implements ConfigurationInterface
                     ->values(['GP', 'TI', 'SI'])
                     ->defaultValue('TI')->end()
                 ->scalarNode('default_sender_alias')
-                    ->defaultNull()->end()
+                    ->defaultValue("")->end()
             ->end();
 
         return $treeBuilder;
