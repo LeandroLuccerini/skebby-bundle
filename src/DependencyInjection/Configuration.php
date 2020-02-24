@@ -17,7 +17,7 @@ class Configuration implements ConfigurationInterface
     /**
      * Generates the configuration tree builder.
      *
-     * @return \Symfony\Component\Config\Definition\Builder\TreeBuilder The tree builder
+     * @return TreeBuilder The tree builder
      */
     public function getConfigTreeBuilder()
     {
@@ -26,25 +26,19 @@ class Configuration implements ConfigurationInterface
         $treeBuilder->getRootNode()
             ->children()
                 ->scalarNode('username')
-                    ->defaultNull()
-                    ->isRequired()->end()
+                    ->defaultNull()->end()
                 ->scalarNode('password')
-                    ->defaultNull()
-                    ->isRequired()->end()
+                    ->defaultNull()->end()
                 ->enumNode('auth_type')
                     ->values(['token', 'session'])
-                    ->defaultValue('token')
-                    ->isRequired()->end()
+                    ->defaultValue('token')->end()
                 ->enumNode('default_message_type')
                     ->values(['GP', 'TI', 'SI'])
-                    ->defaultValue('TI')
-                    ->isRequired()->end()
+                    ->defaultValue('TI')->end()
                 ->scalarNode('default_sender_alias')
                     ->defaultNull()->end()
             ->end();
 
         return $treeBuilder;
     }
-
-
 }
