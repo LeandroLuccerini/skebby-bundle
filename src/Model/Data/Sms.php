@@ -220,7 +220,7 @@ class Sms
     public function setRecipients(array $recipients): Sms
     {
         if (count($recipients) > self::MAX_RECIPIENTS) {
-            throw new TooMuchRecipientsException(sprintf("Triyng to send sms to %d recipients, %d allowed",
+            throw new TooMuchRecipientsException(sprintf("Trying to send sms to %d recipients, %d allowed",
                 count($recipients), self::MAX_RECIPIENTS));
         }
 
@@ -248,7 +248,7 @@ class Sms
     {
 
         if ((count($this->recipients) + 1) > self::MAX_RECIPIENTS) {
-            throw new TooMuchRecipientsException(sprintf("Triyng to send sms to %d recipients, %d allowed",
+            throw new TooMuchRecipientsException(sprintf("Trying to send sms to %d recipients, %d allowed",
                 (count($this->recipients) + 1), self::MAX_RECIPIENTS));
         }
 
