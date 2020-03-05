@@ -215,7 +215,6 @@ class Sms
      * @return Sms
      *
      * @throws TooMuchRecipientsException
-     * @throws \libphonenumber\NumberParseException
      */
     public function setRecipients(array $recipients): Sms
     {

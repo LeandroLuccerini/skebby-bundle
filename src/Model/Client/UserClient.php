@@ -9,7 +9,12 @@
 namespace Szopen\SkebbyBundle\Model\Client;
 
 
+use GuzzleHttp\Exception\GuzzleException;
 use Karriere\JsonDecoder\JsonDecoder;
+use Szopen\SkebbyBundle\Exception\AuthenticationException;
+use Szopen\SkebbyBundle\Exception\InvalidInputException;
+use Szopen\SkebbyBundle\Exception\NotFoundException;
+use Szopen\SkebbyBundle\Exception\UnknownErrorException;
 use Szopen\SkebbyBundle\Model\Response\Status;
 use Szopen\SkebbyBundle\Model\Transformers\StatusEmailTransformer;
 use Szopen\SkebbyBundle\Model\Transformers\StatusTransformer;
@@ -50,10 +55,11 @@ class UserClient extends AbstractClient
      *
      * @return string
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
+     * @throws InvalidInputException
      */
     public function getDashboard(): string
     {
@@ -67,10 +73,11 @@ class UserClient extends AbstractClient
      *
      * @return bool
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
+     * @throws InvalidInputException
      */
     public function checkSession(): bool
     {
@@ -86,10 +93,11 @@ class UserClient extends AbstractClient
      *
      * @return bool
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws NotFoundException
+     * @throws UnknownErrorException
+     * @throws InvalidInputException
      */
     public function resetPassword(string $password): bool
     {
@@ -107,10 +115,11 @@ class UserClient extends AbstractClient
      *
      * @return Status
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
-     * @throws \Szopen\SkebbyBundle\Exception\NotFoundException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws UnknownErrorException
+     * @throws NotFoundException
+     * @throws InvalidInputException
      */
     public function getStatus(bool $getMoney = true): Status
     {

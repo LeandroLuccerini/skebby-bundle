@@ -10,6 +10,7 @@ namespace Szopen\SkebbyBundle\Model\Client;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use Szopen\SkebbyBundle\Exception\AuthenticationException;
@@ -99,7 +100,7 @@ abstract class AbstractClient
      * @throws InvalidInputException
      * @throws NotFoundException
      * @throws UnknownErrorException
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     protected function executeAction(string $action,
                                      string $method = self::ACTION_METHOD_GET,

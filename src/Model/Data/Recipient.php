@@ -9,6 +9,7 @@
 namespace Szopen\SkebbyBundle\Model\Data;
 
 
+use libphonenumber\NumberParseException;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use Szopen\SkebbyBundle\Exception\InvalidVariableTypeException;
@@ -44,7 +45,7 @@ class Recipient implements RecipientInterface
      * @param bool $allowInvalid
      * @param string $locale
      *
-     * @throws \libphonenumber\NumberParseException
+     * @throws NumberParseException
      */
     public function __construct(string $recipient, bool $allowInvalid = false, string $locale = self::DEFAULT_LOCALE)
     {
@@ -89,8 +90,7 @@ class Recipient implements RecipientInterface
     }
 
     /**
-     * @param string $name
-     * @param string $value
+     * @param array $variables
      *
      * @return Recipient
      *

@@ -9,12 +9,18 @@
 namespace Szopen\SkebbyBundle\Model\Client;
 
 
+use GuzzleHttp\Exception\GuzzleException;
 use Karriere\JsonDecoder\JsonDecoder;
+use Szopen\SkebbyBundle\Exception\AuthenticationException;
 use Szopen\SkebbyBundle\Exception\CustomSenderNotAllowedException;
+use Szopen\SkebbyBundle\Exception\InvalidInputException;
+use Szopen\SkebbyBundle\Exception\InvalidMessageTypeException;
+use Szopen\SkebbyBundle\Exception\InvalidOrderIdException;
 use Szopen\SkebbyBundle\Exception\InvalidRecipientTypeException;
 use Szopen\SkebbyBundle\Exception\MissingParameterException;
 use Szopen\SkebbyBundle\Exception\NotFoundException;
 use Szopen\SkebbyBundle\Exception\RecipientsNotFoundException;
+use Szopen\SkebbyBundle\Exception\UnknownErrorException;
 use Szopen\SkebbyBundle\Model\Data\Group;
 use Szopen\SkebbyBundle\Model\Data\Recipient;
 use Szopen\SkebbyBundle\Model\Data\Sms;
@@ -73,11 +79,11 @@ class SmsClient extends AbstractClient
      * @throws MissingParameterException
      * @throws NotFoundException
      * @throws RecipientsNotFoundException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws InvalidOrderIdException
+     * @throws UnknownErrorException
      */
     public function sendSms(Sms $sms,
                             bool $allowInvalidRecipents = false,
@@ -113,11 +119,11 @@ class SmsClient extends AbstractClient
      * @throws MissingParameterException
      * @throws NotFoundException
      * @throws RecipientsNotFoundException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws InvalidOrderIdException
+     * @throws UnknownErrorException
      */
     public function sendGroupSms(Sms $sms,
                                  bool $allowInvalidRecipents = false,
@@ -139,10 +145,10 @@ class SmsClient extends AbstractClient
      *
      * @return SmsRecipientDeliveryState[]
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws UnknownErrorException
      */
     public function getSmsState(string $orderId): array
     {
@@ -182,10 +188,10 @@ class SmsClient extends AbstractClient
      *
      * @return bool
      *
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws UnknownErrorException
      */
     public function deleteScheduledDelivery(string $orderId): bool
     {
@@ -212,11 +218,11 @@ class SmsClient extends AbstractClient
      * @return SmsHistorycalResponse[]
      *
      * @throws NotFoundException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidMessageTypeException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws InvalidMessageTypeException
+     * @throws UnknownErrorException
      */
     public function getMessagesHistory(\DateTime $from,
                                        \DateTime $to = null,
@@ -275,11 +281,11 @@ class SmsClient extends AbstractClient
      * @throws MissingParameterException
      * @throws NotFoundException
      * @throws RecipientsNotFoundException
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     * @throws \Szopen\SkebbyBundle\Exception\AuthenticationException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidInputException
-     * @throws \Szopen\SkebbyBundle\Exception\InvalidOrderIdException
-     * @throws \Szopen\SkebbyBundle\Exception\UnknownErrorException
+     * @throws GuzzleException
+     * @throws AuthenticationException
+     * @throws InvalidInputException
+     * @throws InvalidOrderIdException
+     * @throws UnknownErrorException
      */
     protected function send(Sms $sms,
                             string $endpoint,
