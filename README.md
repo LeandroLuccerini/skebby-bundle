@@ -51,7 +51,7 @@ skebby:
   # If the message type allows a custom TPOA and the field is left empty, the user’s preferred TPOA
   # is used. Must be empty if the message type does not allow a custom TPOA.
   #
-  # default_sender_alias: ~
+  # default_sender_alias: ""
 ```
 Simple Symfony Usage
 -------------
@@ -237,7 +237,7 @@ $smsResponse = $smsClient->sendSms($sms);
 You can read more on methods comments of [```Szopen\SkebbyBundle\Model\Client\SmsClient```](src/Model/Client/SmsClient.php)
 
 #### SkebbyManager
-This class is configured as a Symfony4 service and wraps all the clients methods.
+This class is configured as a Symfony5 service and wraps all the clients methods.
 It adds the ```SkebbyManager::createDefaultSms``` that returns an Sms using all the default parameters configured in the yaml file.
 ```php
 
