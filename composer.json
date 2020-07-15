@@ -14,7 +14,7 @@
     ],
     "require" : {
         "php": ">=7",
-        "symfony/framework-bundle": "5.0.*",
+        "symfony/framework-bundle": "^5.0",
         "giggsey/libphonenumber-for-php": "^8.10",
         "guzzlehttp/guzzle": "^6.3",
         "karriere/json-decoder": "^2.2",
@@ -26,7 +26,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "5.0.*"
+            "require": "^5.0"
         }
     }
 }
