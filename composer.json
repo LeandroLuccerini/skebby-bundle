@@ -14,11 +14,11 @@
     ],
     "require" : {
         "php": ">=7",
-        "symfony/framework-bundle": "^5.1",
+        "symfony/framework-bundle": "5.4.*|^6.0",
         "giggsey/libphonenumber-for-php": "^8.10",
         "guzzlehttp/guzzle": "^7.0",
-        "karriere/json-decoder": "^2.2",
-        "instasent/sms-counter-php": "^0.4.2"
+        "karriere/json-decoder": "^4.0",
+        "instasent/sms-counter-php": "^0.5.2"
     },
     "autoload" : {
         "psr-4": { "Szopen\\SkebbyBundle\\": "src/" }
@@ -26,7 +26,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "^5.1"
+            "require": "^5.0|^6.0"
         }
     }
 }

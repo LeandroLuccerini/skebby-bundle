@@ -8,6 +8,7 @@
 
 namespace Szopen\SkebbyBundle\DependencyInjection;
 
+use Exception;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
@@ -21,7 +22,7 @@ class SkebbyExtension extends Extension
      *
      * @param array $configs
      * @param ContainerBuilder $container
-     * @throws \Exception
+     * @throws Exception
      */
     public function load(array $configs, ContainerBuilder $container)
     {
